@@ -3,19 +3,31 @@ name = "wordinfo"
 version = "0.1.0"
 edition = "2021"
 authors = ["lxl66566 <lxl66566@gmail.com>"]
-description = "A CLI tool to info words' meaning from web"
+description = "A CLI tool to info words from web"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1"
-fake-ua = "0.1.0"
-reqwest = { version = "0.11" }
-tokio = { version = "1", features = ["full"] }
-tl = { version = "0.7.7", features = ["simd"] }
-scraper = "0.17"
-html5ever = "0.26.0"
+reqwest = { version = "0.11", features = ["blocking", "json"] }
+clap = { version = "4.5.1", features = ["derive"] }
+colored = "2.1.0"
+lazy_static = "1.4.0"
+serde = { version = "1.0.197", features = ["derive"] }
+toml = "0.8.10"
+log = "0.4.20"
+env_logger = "0.11.2"
+url = { version = "2.5.0", features = ["serde"] }
+wana_kana = "3.0.0"
+scraper = "0.18.1"                                              # https://lib.rs/crates/scraper
+
+[dependencies.die-exit]
+version = "*"
+git = "https://github.com/lxl66566/die.git"
+features = ["red"]
+
 
 [profile.release]
 strip = true
 lto = true
+panic = "abort"
+opt-level = "z"
