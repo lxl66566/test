@@ -21,7 +21,6 @@ jobs:
     needs: create-release
     strategy:
       matrix:
-        rust_target: nightly
         include:
           - target: aarch64-unknown-linux-musl
             os: ubuntu-latest
@@ -39,7 +38,7 @@ jobs:
       - name: Set up nightly
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust_target }}
+          toolchain: nightly
           override: true
       - name: Install cross-compilation tools
         uses: taiki-e/setup-cross-toolchain-action@v1
