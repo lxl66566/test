@@ -14,13 +14,22 @@ pub struct Word {
 }
 
 impl Word {
-    pub fn all(s: &str) -> Self {
-        Self {
-            it: s.to_string(),
-            metadata: s.to_string(),
-            definition: s.to_string(),
-            example: s.to_string(),
+    pub fn new<S1, S2, S3, S4>(it: S1, metadata: S2, definition: S3, example: S4) -> Self
+    where
+        S1: Into<String>,
+        S2: Into<String>,
+        S3: Into<String>,
+        S4: Into<String>,
+    {
+        Word {
+            it: it.into(),
+            metadata: metadata.into(),
+            definition: definition.into(),
+            example: example.into(),
         }
+    }
+    pub fn all(s: &str) -> Self {
+        Self::new(s, s, s, s)
     }
     pub fn print(&self, color: &Word) {
         println!("{}", self.it.as_str().color(color.it.as_ref()));
@@ -47,18 +56,8 @@ mod tests {
 
     #[test]
     fn test_print() {
-        let w = Word {
-            it: "test".to_string(),
-            metadata: "123".to_string(),
-            definition: "456".to_string(),
-            example: "789".to_string(),
-        };
-        let color = Word {
-            it: "red".to_string(),
-            metadata: "green".to_string(),
-            definition: "blue".to_string(),
-            example: "yellow".to_string(),
-        };
+        let w = Word::new("test", "123", "456", "789");
+        let color = Word::new("red", "green", "blue", "yellow");
         w.print(&color);
     }
 }

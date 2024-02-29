@@ -2,7 +2,7 @@ use clap::{Args, Parser, Subcommand};
 use lazy_static::lazy_static;
 use serde::Serialize;
 
-#[derive(Parser)]
+#[derive(Parser, Clone, Debug)]
 #[command(author, version, about, long_about = None, after_help = r#"Examples:
 "#)]
 pub struct Cli {
@@ -24,7 +24,7 @@ pub struct Cli {
 }
 
 /// Subcommand
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand, Debug, Clone)]
 pub enum Commands {
     Config(Config),
     Export,

@@ -19,6 +19,8 @@ env_logger = "0.11.2"
 url = { version = "2.5.0", features = ["serde"] }
 wana_kana = "3.0.0"
 scraper = "0.18.1"                                              # https://lib.rs/crates/scraper
+home = "0.5.9"
+anyhow = "1.0.80"
 
 [dependencies.die-exit]
 version = "*"

@@ -1,8 +1,8 @@
 use super::word::Word;
 use serde::{Deserialize, Serialize};
-use url::Url;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[non_exhaustive]
+#[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Selector {
     /// The name of this selector
     pub name: String,
@@ -11,8 +11,8 @@ pub struct Selector {
     /// selector, the String members become String CSS selectors.
     pub selector: Word,
     /// The format URL to fetch
-    pub url: Url,
-    /// one word in online page may have many paragraph, each paragraph has diffirent meanings. The `field` is to select diffirent fields.
+    pub url: String,
+    /// select diffirent fields which may have diffirent meaning.
     pub field: Vec<String>,
 }
 
@@ -23,4 +23,21 @@ pub enum SelectorType {
     Api,
     #[default]
     Css,
+}
+
+impl Selector {
+    pub fn new<T1, V>(name: T1, selector: Word, url: String, field: V) -> Self
+    where
+        T1: Into<String>,
+        V: IntoIterator,
+        V::Item: Into<String>,
+    {
+        Selector {
+            name: name.into(),
+            selector_type: SelectorType::Css,
+            selector,
+            url,
+            field: field.into_iter().map(Into::into).collect(),
+        }
+    }
 }
