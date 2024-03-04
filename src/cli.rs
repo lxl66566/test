@@ -11,16 +11,18 @@ pub struct Cli {
     pub words: Vec<String>,
     /// English words
     #[arg(short, long)]
+    #[clap(conflicts_with_all = &["japanese"])]
     pub english: bool,
     /// Japanese words
     #[arg(short, long)]
+    #[clap(conflicts_with_all = &["english"])]
     pub japanese: bool,
     /// Which selector to use
     #[arg(short, long)]
     pub selector: Option<String>,
     /// subcommand
     #[command(subcommand)]
-    pub command: Commands,
+    pub command: Option<Commands>,
 }
 
 /// Subcommand
@@ -40,4 +42,16 @@ pub struct Config {
 
 lazy_static! {
     pub static ref CLI: Cli = Cli::parse();
+}
+
+impl Cli {
+    pub fn get_cli_language(&self) -> Option<&'static str> {
+        if self.english {
+            Some("en")
+        } else if self.japanese {
+            Some("jp")
+        } else {
+            None
+        }
+    }
 }
