@@ -39,10 +39,6 @@ impl Word {
         }
     }
 
-    pub fn all(s: &str) -> Self {
-        Self::new(s, s, s, s)
-    }
-
     pub fn is_empty(&self) -> bool {
         self.definition.trim().is_empty()
     }
@@ -77,7 +73,10 @@ mod tests {
     #[test]
     fn test_print() {
         let w = Word::new("test", "123", "456", "789");
-        let color = Word::new("red", "green", "blue", "yellow");
+        let mut color = Word::new("red", "green", "blue", "yellow");
         w.print(&color);
+        assert!(!w.is_empty());
+        color.definition = "  \n  \t ".into();
+        assert!(color.is_empty());
     }
 }

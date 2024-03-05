@@ -1,5 +1,4 @@
-use super::word::{self, Delimiter, Word};
-use crate::config::CONFIG;
+use super::word::{Delimiter, Word};
 use die_exit::*;
 use scraper::{error::SelectorErrorKind, Html};
 use serde::{Deserialize, Serialize};
@@ -124,5 +123,42 @@ impl Selector {
 
     pub fn select_one(&self, html: &Html, word: &str) -> Word {
         self.selector.select_one(html, word, &self.delimiter)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_select_one() {
+        let html = Html::parse_document(
+            r#"
+            <div>
+                <div class="it">TestWord</div>
+                <div class="it">TestWord</div>
+                <div class="metadata">TestMetadata</div>
+                <div class="metadata">TestMetadata</div>
+                <div class="definition">TestDefinition</div>
+                <div class="definition">TestDefinition</div>
+                <div class="example">TestExample</div>
+                <div class="example">TestExample</div>
+            </div>
+        "#,
+        );
+        let delimiter = Delimiter::new("_", ", ", "; ", ". ");
+        let realselectorstring =
+            RealSelectorString::new(".it", ".metadata", ".definition", ".example");
+        let result_word = realselectorstring.select_one(&html, "", &delimiter);
+        let expected_word = Word::new(
+            "TestWord_TestWord",
+            "TestMetadata, TestMetadata",
+            "TestDefinition; TestDefinition",
+            "TestExample. TestExample",
+        );
+        assert_eq!(result_word.it, expected_word.it);
+        assert_eq!(result_word.metadata, expected_word.metadata);
+        assert_eq!(result_word.definition, expected_word.definition);
+        assert_eq!(result_word.example, expected_word.example);
     }
 }

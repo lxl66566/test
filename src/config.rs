@@ -49,13 +49,13 @@ impl Config {
                 .parent()
                 .expect("can not find parent dir in config."),
         )
-        .expect("Failed to create `.config` directory");
-        let toml_string = toml::to_string_pretty(self)?;
+        .die("Failed to create `.config` directory");
+        let toml_string = toml::to_string_pretty(self).expect("Failed to serialize config.");
         fs::write(config_path, toml_string)?;
         Ok(())
     }
 
-    pub fn get_selectors_by_language(&self, language: Option<&'static str>) -> &Vec<Selector> {
+    fn get_selectors_by_language(&self, language: Option<&'static str>) -> &Vec<Selector> {
         match language.unwrap_or(self.default_language.as_str()) {
             "en" => &self.en,
             "jp" => &self.jp,
@@ -80,7 +80,7 @@ impl Config {
             return first_selector();
         }
         for selector in selectors.iter() {
-            if selector_name.as_ref().unwrap() == &selector.name {
+            if selector.name.starts_with(selector_name.as_ref().unwrap()) {
                 return selector;
             }
         }
@@ -110,8 +110,8 @@ impl Default for Config {
                 Selector::new(
                     "cambridge-zh",
                     RealSelectorString::new(
-                        ".hw.dhw",
-                        ".pos-header.dpos-h .region.dreg, .pron.dpron",
+                        ".pr.entry-body__el:nth-of-type(1) .di-title",
+                        ".pr.entry-body__el:nth-of-type(1) .pos-header.dpos-h .region.dreg,.pr.entry-body__el:nth-of-type(1) .pos-header.dpos-h .pron.dpron",
                         ".def.ddef_d.db, .def-body.ddef_b > .trans.dtrans.dtrans-se.break-cj",
                         ".examp.dexamp",
                     ),
@@ -186,5 +186,14 @@ mod tests {
         let config = Config::default();
         let selectors = config.get_selectors_by_language(None);
         assert!(selectors.iter().any(|x| x.name == "oxford"));
+    }
+
+    #[test]
+    fn test_get_selector_by_name() {
+        let config = Config::default();
+        let selector = config.get_selector_by_name(None, Some("cam".into()));
+        assert_eq!(selector.name, "cambridge-zh");
+        let selector = config.get_selector_by_name(Some("jp"), Some("cam".into()));
+        assert_eq!(selector.name, "cambridge-en");
     }
 }

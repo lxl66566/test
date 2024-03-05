@@ -4,16 +4,20 @@ use serde::Serialize;
 
 #[derive(Parser, Clone, Debug)]
 #[command(author, version, about, long_about = None, after_help = r#"Examples:
+wordinfo apple          # Query for English `apple`, = wordinfo -e apple
+wordinfo -j すき        # Query Japanese `すき`, = wordinfo -j suki.
+wordinfo -s oxf apple   # Specify to query apple using the oxford selector.
 "#)]
+#[clap(args_conflicts_with_subcommands = true)]
 pub struct Cli {
-    /// The words to info
+    /// words to look up
     #[clap(required = true)]
     pub words: Vec<String>,
-    /// English words
+    /// info English words
     #[arg(short, long)]
     #[clap(conflicts_with_all = &["japanese"])]
     pub english: bool,
-    /// Japanese words
+    /// info Japanese words
     #[arg(short, long)]
     #[clap(conflicts_with_all = &["english"])]
     pub japanese: bool,
@@ -23,7 +27,7 @@ pub struct Cli {
     /// subcommand
     #[command(subcommand)]
     pub command: Option<Commands>,
-    /// not show url
+    /// do not output url
     #[arg(short, long)]
     pub no_url: bool,
 }
@@ -31,7 +35,9 @@ pub struct Cli {
 /// Subcommand
 #[derive(Subcommand, Debug, Clone)]
 pub enum Commands {
+    /// config wordinfo, WIP
     Config(Config),
+    /// export default config file
     Export,
 }
 
