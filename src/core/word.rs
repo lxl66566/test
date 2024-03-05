@@ -1,8 +1,18 @@
+use super::selector::RealSelectorString;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
 
+/// the delimiter of metadata and other Word members.
+pub type Delimiter = RealSelectorString;
+
+impl Default for Delimiter {
+    fn default() -> Self {
+        Delimiter::new(" ", " ", "; ", "\n")
+    }
+}
+
 /// A word and its explanations.
-/// The Strings of it can be also used in Selector and Color.
+/// It can also be used in Color.
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct Word {
     /// word itself.
@@ -28,17 +38,27 @@ impl Word {
             example: example.into(),
         }
     }
+
     pub fn all(s: &str) -> Self {
         Self::new(s, s, s, s)
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.definition.trim().is_empty()
+    }
+
     pub fn print(&self, color: &Word) {
-        println!("{}", self.it.as_str().color(color.it.as_ref()));
-        println!("{}", self.metadata.as_str().color(color.metadata.as_ref()));
+        if self.is_empty() {
+            println!("Definition not found for word `{}`", self.it);
+            return;
+        }
         println!(
-            "{}",
-            self.definition.as_str().color(color.definition.as_ref())
-        );
-        println!("{}", self.example.as_str().color(color.example.as_ref()));
+            "{}\n{}\n{}\n{}",
+            self.it.as_str().color(color.it.as_ref()),
+            self.metadata.as_str().color(color.metadata.as_ref()),
+            self.definition.as_str().color(color.definition.as_ref()),
+            self.example.as_str().color(color.example.as_ref())
+        )
     }
 }
 

@@ -23,6 +23,9 @@ pub struct Cli {
     /// subcommand
     #[command(subcommand)]
     pub command: Option<Commands>,
+    /// not show url
+    #[arg(short, long)]
+    pub no_url: bool,
 }
 
 /// Subcommand

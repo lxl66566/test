@@ -1,5 +1,9 @@
-use crate::core::{selector::Selector, word::Word};
+use crate::core::{
+    selector::{RealSelectorString, Selector},
+    word::{Delimiter, Word},
+};
 use anyhow::Result;
+use colored::Colorize;
 use die_exit::*;
 use home::home_dir;
 use lazy_static::lazy_static;
@@ -24,7 +28,6 @@ impl Config {
     pub fn config_path() -> std::path::PathBuf {
         let mut path = home_dir().die("Failed to get home directory");
         path.push(".config");
-        fs::create_dir(&path).expect("Failed to create `.config` directory");
         path.push("wordinfo.toml");
         path
     }
@@ -41,6 +44,12 @@ impl Config {
     /// save config to config_path
     pub fn save(&self) -> Result<()> {
         let config_path = Config::config_path();
+        fs::create_dir_all(
+            config_path
+                .parent()
+                .expect("can not find parent dir in config."),
+        )
+        .expect("Failed to create `.config` directory");
         let toml_string = toml::to_string_pretty(self)?;
         fs::write(config_path, toml_string)?;
         Ok(())
@@ -65,7 +74,7 @@ impl Config {
             selectors
                 .iter()
                 .next()
-                .die(&format!("no selector found in {}", self.default_language))
+                .die(&format!("no selector found in `{}`", self.default_language))
         };
         if selector_name.is_none() {
             return first_selector();
@@ -75,6 +84,18 @@ impl Config {
                 return selector;
             }
         }
+        eprintln!(
+            "Selector `{}` not found, use default selector...",
+            selector_name.unwrap()
+        );
+        print!(
+            "Hint: all available selectors in language `{}`: ",
+            language.unwrap_or(self.default_language.as_str())
+        );
+        for selector in selectors.iter() {
+            print!("`{}` ", selector.name.green());
+        }
+        println!();
         first_selector()
     }
 }
@@ -85,8 +106,74 @@ impl Default for Config {
             version: std::env!("CARGO_PKG_VERSION").to_string(),
             default_language: "en".to_string(),
             color: Word::new("red", "blue", "green", "yellow"),
-            en: vec![], // Selector::new("weblio", Word ,url, field)
-            jp: vec![],
+            en: vec![
+                Selector::new(
+                    "cambridge-zh",
+                    RealSelectorString::new(
+                        ".hw.dhw",
+                        ".pos-header.dpos-h .region.dreg, .pron.dpron",
+                        ".def.ddef_d.db, .def-body.ddef_b > .trans.dtrans.dtrans-se.break-cj",
+                        ".examp.dexamp",
+                    ),
+                    "https://dictionary.cambridge.org/dictionary/english-chinese-simplified/{}",
+                    Delimiter {
+                        definition: "\n".into(),
+                        ..Default::default()
+                    },
+                ),
+                Selector::new(
+                    "oxford",
+                    RealSelectorString::new(
+                        ".webtop .headword",
+                        ".phons_n_am .phon",
+                        ".def",
+                        ".examples",
+                    ),
+                    "https://www.oxfordlearnersdictionaries.com/search/english/?q={}",
+                    Default::default(),
+                ),
+                Selector::new(
+                    "bing-cn",
+                    RealSelectorString::new(
+                        "#headword",
+                        ".hd_prUS.b_primtxt, .hd_pr.b_primtxt",
+                        ".qdef > ul > li > span",
+                        ".se_li1 > .sen_en, .se_li1 > .sen_cn",
+                    ),
+                    "https://cn.bing.com/dict/search?q={}",
+                    Delimiter {
+                        definition: " ".into(),
+                        ..Default::default()
+                    },
+                ),
+            ],
+            jp: vec![
+                Selector::new(
+                    "weblio",
+                    RealSelectorString::new(
+                        "NULL",
+                        ".Sgkdj > p:nth-of-type(1)",
+                        ".Sgkdj > p:nth-of-type(2)",
+                        ".Wnryj > ul > li",
+                    ),
+                    "https://www.weblio.jp/content/{}",
+                    Delimiter {
+                        definition: "\n".into(),
+                        ..Default::default()
+                    },
+                ),
+                Selector::new(
+                    "cambridge-en",
+                    RealSelectorString::new(
+                        ".pr.dictionary .tw-bw.dhw.dpos-h_hw.di-title",
+                        ".pr.dictionary .var.dvar .v.dv.lmr-0",
+                        ".pr.dictionary .def.ddef_d.db, .def-body.ddef_b.ddef_b-t > .trans.dtrans",
+                        ".pr.dictionary .examp.dexamp",
+                    ),
+                    "https://dictionary.cambridge.org/dictionary/japanese-english/{}",
+                    Default::default(),
+                ),
+            ],
         }
     }
 }
@@ -98,5 +185,6 @@ mod tests {
     fn test_get_selectors_by_language() {
         let config = Config::default();
         let selectors = config.get_selectors_by_language(None);
+        assert!(selectors.iter().any(|x| x.name == "oxford"));
     }
 }
