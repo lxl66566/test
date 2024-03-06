@@ -1,6 +1,6 @@
 [package]
 name = "wordinfo"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
 authors = ["lxl66566 <lxl66566@gmail.com>"]
 description = "A CLI tool to info words from web."
@@ -23,6 +23,9 @@ home = "0.5.9"
 anyhow = "1.0.80"
 tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros"] }
 futures = "0.3.30"
+serde_json = "1.0.114"
+serde_yaml = "0.9.32"
+
 
 [dependencies.die-exit]
 version = "*"

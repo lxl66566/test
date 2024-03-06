@@ -1,14 +1,17 @@
-use crate::core::{
-    selector::{RealSelectorString, Selector},
-    word::{Delimiter, Word},
+use crate::{
+    cli::Format,
+    core::{
+        selector::{RealSelectorString, Selector},
+        word::{Delimiter, Word},
+    },
 };
-use anyhow::Result;
+use anyhow::{Error, Result};
 use colored::Colorize;
 use die_exit::*;
 use home::home_dir;
 use lazy_static::lazy_static;
 use serde::{Deserialize, Serialize};
-use std::fs;
+use std::{collections::HashMap, fs};
 
 lazy_static! {
     pub static ref CONFIG: Config = Config::load();
@@ -19,8 +22,11 @@ pub struct Config {
     pub version: String,
     pub default_language: String,
     pub color: Word,
+    pub delimiter_between_words: String,
+    pub delimiter_between_paragraphs: String,
     pub en: Vec<Selector>,
     pub jp: Vec<Selector>,
+    pub other_languages: HashMap<String, Vec<Selector>>,
 }
 
 impl Config {
@@ -28,21 +34,35 @@ impl Config {
     pub fn config_path() -> std::path::PathBuf {
         let mut path = home_dir().die("Failed to get home directory");
         path.push(".config");
-        path.push("wordinfo.toml");
+        path.push("wordinfo");
         path
     }
 
     /// get config, otherwise use default value
     pub fn load() -> Config {
         fn raise() -> Result<Config> {
-            let content = fs::read_to_string(Config::config_path())?;
-            Ok(toml::from_str(&content)?)
+            if let Ok(content) = fs::read_to_string(Config::config_path().with_extension("json")) {
+                return serde_json::from_str(&content).map_err(Error::from);
+            }
+            if let Ok(content) = fs::read_to_string(Config::config_path().with_extension("toml")) {
+                return toml::from_str(&content).map_err(Error::from);
+            }
+            if let Ok(content) = fs::read_to_string(Config::config_path().with_extension("yaml")) {
+                return serde_yaml::from_str(&content).map_err(Error::from);
+            }
+            Ok(Config::default())
         }
-        raise().unwrap_or_default()
+        raise().unwrap_or_else(|_| {
+            println!(
+                "{}",
+                "WARNING: Failed to parse config file, using default config.".yellow()
+            );
+            Config::default()
+        })
     }
 
     /// save config to config_path
-    pub fn save(&self) -> Result<()> {
+    pub fn save(&self, format: &Format) -> Result<()> {
         let config_path = Config::config_path();
         fs::create_dir_all(
             config_path
@@ -50,8 +70,22 @@ impl Config {
                 .expect("can not find parent dir in config."),
         )
         .die("Failed to create `.config` directory");
-        let toml_string = toml::to_string_pretty(self).expect("Failed to serialize config.");
-        fs::write(config_path, toml_string)?;
+        match format {
+            Format::Json => {
+                let json_string =
+                    serde_json::to_string_pretty(self).expect("Failed to serialize config.");
+                fs::write(config_path.with_extension("json"), json_string)?;
+            }
+            Format::Toml => {
+                let toml_string =
+                    toml::to_string_pretty(self).expect("Failed to serialize config.");
+                fs::write(config_path.with_extension("toml"), toml_string)?;
+            }
+            Format::Yaml => {
+                let yaml_string = serde_yaml::to_string(self).expect("Failed to serialize config.");
+                fs::write(config_path.with_extension("yaml"), yaml_string)?;
+            }
+        }
         Ok(())
     }
 
@@ -59,7 +93,10 @@ impl Config {
         match language.unwrap_or(self.default_language.as_str()) {
             "en" => &self.en,
             "jp" => &self.jp,
-            _ => &self.en,
+            lang => self
+                .other_languages
+                .get(lang)
+                .die(&format!("Selector not found with name `{}`", lang)),
         }
     }
 
@@ -97,6 +134,24 @@ impl Config {
         }
         println!();
         first_selector()
+    }
+
+    pub fn show_all_selectors(&self) {
+        let show_selectors = |selectors: &Vec<Selector>| {
+            for selector in selectors.iter() {
+                print!("`{}` ", selector.name.green());
+            }
+            println!();
+        };
+        println!("All Available selectors:");
+        print!("en: ");
+        show_selectors(&self.en);
+        print!("jp: ");
+        show_selectors(&self.jp);
+        for pair in self.other_languages.iter() {
+            print!("{}: ", pair.0);
+            show_selectors(pair.1);
+        }
     }
 }
 
@@ -174,6 +229,9 @@ impl Default for Config {
                     Default::default(),
                 ),
             ],
+            other_languages: HashMap::default(),
+            delimiter_between_paragraphs: "\n".into(),
+            delimiter_between_words: "\n\n".into()
         }
     }
 }

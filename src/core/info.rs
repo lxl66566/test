@@ -36,11 +36,10 @@ where
     while let Some(result) = queue.next().await {
         match result {
             Ok((word, url)) => {
-                word.print(&CONFIG.color);
-                if !CLI.no_url {
-                    println!("more infomation: {}", url);
+                if word.print() && !CLI.no_url {
+                    print!("more infomation: {}", url);
                 }
-                println!()
+                print!("{}", CONFIG.delimiter_between_words);
             }
             Err(e) => println!("{}", e),
         };

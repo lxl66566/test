@@ -4,7 +4,7 @@
 
 wordinfo 是一个命令行工具，用于从网络上获取单词的详细信息，包括读音，释义，例句等。
 
-它是 [bakadict](https://github.com/flaribbit/bakadict) 的补充：bakadict 从本地词典中查找单词，而 wordinfo 从网络中获取单词信息；bakadict 仅支持日语，而 wordinfo 支持多种语言。（当前仅支持英语、日语，但可扩展至其他语言。）
+它是 [bakadict](https://github.com/flaribbit/bakadict) 的补充：bakadict 从本地词典中查找单词，而 wordinfo 从网络中获取单词信息；bakadict 仅支持日语，而 wordinfo 支持任意语言。
 
 wordinfo 允许您编写自己的 [CSS Selector](https://developer.mozilla.org/zh-CN/docs/Web/CSS/CSS_selectors) 以适应不同语言、不同网站的单词查询。
 
@@ -38,23 +38,37 @@ Examples:
 wordinfo apple              # 查询 apple，= `wordinfo -e apple`
 wordinfo -j すき            # 查询 すき，= `wordinfo -j suki`
 wordinfo -s oxf apple       # 指定使用 oxford selector 查询 apple
+wordinfo show               # 显示所有可用 CSS Selector
 ```
 
 wordinfo 支持多种语言，默认使用英语。查询日语时，输入罗马音能够进行假名转换。
 
-`wordinfo -s afs...`（随便输点什么）可以查询当前可用 CSS Selector。指定 CSS Selector 时可以简写，例如 `wordinfo -s oxf ...` 等价于 `wordinfo -s oxford ...`。
+指定 CSS Selector 时可以简写，例如 `wordinfo -s oxf ...` 等价于 `wordinfo -s oxford ...`。
 
 ## 配置
 
-执行 `wordinfo export` 导出默认配置文件到 `~/.config/wordinfo.toml`（Windows: `%userprofile%/.config/wordinfo.toml`），编辑配置项即可。
+执行 `wordinfo export` 导出默认配置文件到 `~/.config/wordinfo.json`（Windows: `%userprofile%/.config/wordinfo.json`），编辑配置项即可。您可以自由选择 _json_, _toml_, _yaml_ 作为导出的配置格式。
 
 目前可调的项目有：
 
-```
-default_language:   默认语言
-color:              每部分输出的默认颜色
-en:                 英语 CSS Selectors
-jp:                 日语 CSS Selectors
-```
+|              键              |            内容            |
+| :--------------------------: | :------------------------: |
+|       default_language       |          默认语言          |
+|            color             |    每部分输出的默认颜色    |
+|              en              |     英语 CSS Selectors     |
+|              jp              |     日语 CSS Selectors     |
+|       other_languages        | 其他语言及其 CSS Selectors |
+| delimiter_between_paragraphs |   每个词内各部分的分隔符   |
+|   delimiter_between_words    |      不同词间的分隔符      |
 
-如果要调整默认使用的 CSS Selector，只需将其放到最前即可。（每三个连续的 `[[en]]`, `[en.selector]`, `[en.delimiter]` 属于一个 CSS Selector 整体，需要一起移动）
+如果要调整默认使用的 CSS Selector，只需将其放到语言组中的最前面即可。
+
+如果需要添加新语言的 CSS Selector，可以更改 `other_languages`，参考如下形式（`<lang>` 为语言标识）。
+
+```json
+"other_languages": {
+    "<lang>": [
+      ... Selectors
+    ]
+  }
+```

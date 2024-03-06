@@ -15,13 +15,14 @@ async fn main() {
     }
     // export
     match CLI.command.as_ref().unwrap() {
-        Commands::Export => CONFIG.save().die_with(|err| {
+        Commands::Export(e) => CONFIG.save(&e.format).die_with(|err| {
             format!(
                 "Fail to save config to `{}` because of: {}",
                 Config::config_path().display(),
                 err
             )
         }),
+        Commands::Show => CONFIG.show_all_selectors(),
         Commands::Config(_) => unimplemented!(),
     }
 }

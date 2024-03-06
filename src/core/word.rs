@@ -1,4 +1,5 @@
 use super::selector::RealSelectorString;
+use crate::config::CONFIG;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
 
@@ -24,6 +25,22 @@ pub struct Word {
 }
 
 impl Word {
+    /// preprocessing the given Strings, remove redundent space
+    fn preprocessing(mut self) -> Word {
+        let p = |s: String| {
+            s.lines()
+                .map(|line| line.trim())
+                .filter(|line| !line.is_empty())
+                .collect::<Vec<&str>>()
+                .join("\n")
+        };
+        self.it = p(self.it);
+        self.metadata = p(self.metadata);
+        self.definition = p(self.definition);
+        self.example = p(self.example);
+        self
+    }
+
     pub fn new<S1, S2, S3, S4>(it: S1, metadata: S2, definition: S3, example: S4) -> Self
     where
         S1: Into<String>,
@@ -37,24 +54,20 @@ impl Word {
             definition: definition.into(),
             example: example.into(),
         }
+        .preprocessing()
     }
 
     pub fn is_empty(&self) -> bool {
         self.definition.trim().is_empty()
     }
 
-    pub fn print(&self, color: &Word) {
+    pub fn print(&self) -> bool {
         if self.is_empty() {
-            println!("Definition not found for word `{}`", self.it);
-            return;
+            print!("Definition not found for word `{}`", self.it);
+            return false;
         }
-        println!(
-            "{}\n{}\n{}\n{}",
-            self.it.as_str().color(color.it.as_ref()),
-            self.metadata.as_str().color(color.metadata.as_ref()),
-            self.definition.as_str().color(color.definition.as_ref()),
-            self.example.as_str().color(color.example.as_ref())
-        )
+        println!("{}", self);
+        true
     }
 }
 
@@ -66,6 +79,28 @@ impl PartialEq for Word {
 
 impl Eq for Word {}
 
+impl std::fmt::Display for Word {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let d = &CONFIG.delimiter_between_paragraphs;
+        write!(
+            f,
+            "{}{}{}{}{}{}{}",
+            self.it.as_str().color(CONFIG.color.it.as_ref()),
+            d,
+            self.metadata.as_str().color(CONFIG.color.metadata.as_ref()),
+            d,
+            self.definition
+                .as_str()
+                .color(CONFIG.color.definition.as_ref()),
+            d,
+            self.example
+                .as_str()
+                .trim_end()
+                .color(CONFIG.color.example.as_ref())
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -74,7 +109,7 @@ mod tests {
     fn test_print() {
         let w = Word::new("test", "123", "456", "789");
         let mut color = Word::new("red", "green", "blue", "yellow");
-        w.print(&color);
+        w.print();
         assert!(!w.is_empty());
         color.definition = "  \n  \t ".into();
         assert!(color.is_empty());
