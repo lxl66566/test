@@ -9,4 +9,4 @@ page.get(
     timeout=20,
 )
 print("page open success")
-print(page.ele("css:️.anchor.anchorWithStickyNavbar_LWe7 > p").text)
+print(page.ele("css=.anchor.anchorWithStickyNavbar_LWe7").text)
