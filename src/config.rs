@@ -228,6 +228,17 @@ impl Default for Config {
                     "https://dictionary.cambridge.org/dictionary/japanese-english/{}",
                     Default::default(),
                 ),
+                Selector::new(
+                    "dict-asia",
+                    RealSelectorString::new(
+                        "#jp_Resunt_panel #jp_comment:nth-child(1) .jpword",
+                        "#jp_Resunt_panel #jp_comment:nth-child(1) #kana_0",
+                        "#jp_Resunt_panel #jp_comment:nth-child(1) #comment_0",
+                        "NULL", // This dict is not so good to seperate definition and example.
+                    ),
+                    "https://dict.asia/jc/{}",
+                    Default::default(),
+                ),
             ],
             other_languages: HashMap::default(),
             delimiter_between_paragraphs: "\n".into(),
