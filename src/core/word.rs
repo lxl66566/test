@@ -1,7 +1,8 @@
-use super::selector::RealSelectorString;
-use crate::config::CONFIG;
 use colored::Colorize;
 use serde::{Deserialize, Serialize};
+
+use super::selector::RealSelectorString;
+use crate::config::CONFIG;
 
 /// the delimiter of metadata and other Word members.
 pub type Delimiter = RealSelectorString;

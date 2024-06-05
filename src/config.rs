@@ -1,3 +1,12 @@
+use std::{collections::HashMap, fs};
+
+use anyhow::{Error, Result};
+use colored::Colorize;
+use die_exit::*;
+use home::home_dir;
+use lazy_static::lazy_static;
+use serde::{Deserialize, Serialize};
+
 use crate::{
     cli::Format,
     core::{
@@ -5,13 +14,6 @@ use crate::{
         word::{Delimiter, Word},
     },
 };
-use anyhow::{Error, Result};
-use colored::Colorize;
-use die_exit::*;
-use home::home_dir;
-use lazy_static::lazy_static;
-use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fs};
 
 lazy_static! {
     pub static ref CONFIG: Config = Config::load();

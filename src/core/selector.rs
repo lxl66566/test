@@ -1,7 +1,8 @@
-use super::word::{Delimiter, Word};
 use die_exit::*;
 use scraper::{error::SelectorErrorKind, Html};
 use serde::{Deserialize, Serialize};
+
+use super::word::{Delimiter, Word};
 
 /// The actual struct to select html.
 pub struct RealSelector {

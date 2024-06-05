@@ -1,12 +1,10 @@
-use super::selector::Selector;
-use super::word::Word;
-use crate::cli::CLI;
-use crate::config::CONFIG;
 use anyhow::Result;
-use futures::stream::FuturesOrdered;
-use futures::StreamExt;
+use futures::{stream::FuturesOrdered, StreamExt};
 use scraper::Html;
 use wana_kana::ConvertJapanese;
+
+use super::{selector::Selector, word::Word};
+use crate::{cli::CLI, config::CONFIG};
 
 /// get a word's info from a selector
 async fn get_word_info<'a, T>(selector: &Selector, word: T) -> Result<(Word, String)>

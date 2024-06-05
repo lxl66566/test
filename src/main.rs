@@ -2,9 +2,10 @@ mod cli;
 mod config;
 mod core;
 
+use core::info::info;
+
 use cli::{Commands, CLI};
 use config::{Config, CONFIG};
-use core::info::info;
 use die_exit::*;
 
 #[tokio::main]
