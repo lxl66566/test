@@ -4,6 +4,13 @@ version = "1.1.0"
 edition = "2021"
 authors = ["lxl66566 <lxl66566@gmail.com>"]
 description = "A CLI tool to info words from web."
+repository = "https://github.com/lxl66566/wordinfo"
+
+[package.metadata.wix]
+upgrade-guid = "8C34AF2B-A77F-4095-8FAA-130DEACD95A5"
+path-guid = "44552AFB-DF9F-4230-A0B7-F8A06E64C1CB"
+license = false
+eula = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -33,3 +40,8 @@ strip = true
 lto = true
 panic = "abort"
 opt-level = "z"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
