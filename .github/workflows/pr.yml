@@ -13,7 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: git switch ${{ env.CURRENT_BRANCH }}
+      - name: Get PR branch name
+        run: echo "PR_BRANCH=${GITHUB_HEAD_REF}" >> $GITHUB_ENV
       - uses: fregante/setup-git-user@v2
       - run: cargo fmt --all
       - name: Check for modified files
@@ -23,7 +24,7 @@ jobs:
         if: steps.git-check.outputs.modified == 'true'
         run: |
           git commit -am "Automated changes"
-          git push origin ${{ env.CURRENT_BRANCH }}
+          git push origin ${{ env.PR_BRANCH }}
 
   test:
     name: cargo test
