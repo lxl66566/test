@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: git switch ${{ env.CURRENT_BRANCH }}
       - uses: fregante/setup-git-user@v2
       - run: cargo fmt --all
       - name: Check for modified files
@@ -22,7 +23,7 @@ jobs:
         if: steps.git-check.outputs.modified == 'true'
         run: |
           git commit -am "Automated changes"
-          git push
+          git push origin ${{ env.CURRENT_BRANCH }}
 
   test:
     name: cargo test
